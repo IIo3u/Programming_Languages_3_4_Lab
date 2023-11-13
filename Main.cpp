@@ -387,11 +387,17 @@ public:
 	void go_next(int position);
 	void go_back();
 	void Special_Algorythm(Node<SomeType>* RootNode);
+	void help();
 };
 
 template<typename SomeType>
 void Tree<SomeType>::add_leaf(int position, SomeType Data)
 {
+	if (position < 0 || position > Vertexes-1) 
+	{
+		cout << "Wrong position, try else." << endl;
+		return;
+	}
 	if (this->CurrentNode->NextAddressArray[position] == nullptr)
 	{
 		Node<SomeType>* NewNode = new Node<SomeType>{ Data };
@@ -402,24 +408,32 @@ void Tree<SomeType>::add_leaf(int position, SomeType Data)
 			Hight = NewNode->Level + 1;
 		}
 		this->CurrentNode->NextAddressArray[position] = NewNode;
-		
+		return;
 	}
 	else 
 	{
 		cout << "Denied in this direction, try else." << endl;
+		return;
 	}
 }
 
 template<typename SomeType>
 void Tree<SomeType>::go_next(int position)
 {
-	if (CurrentNode->NextAddressArray[position] != nullptr)
+	if (position < 0 || position > Vertexes - 1)
 	{
-		CurrentNode = CurrentNode->NextAddressArray[position];
+		cout << "Wrong position, try else." << endl;
+		return;
+	}
+	if (CurrentNode->NextAddressArray[position] == nullptr)
+	{
+		
+		cout << "This is an empty place, try else." << endl;
+		return;
 	}
 	else 
 	{
-		cout << "This is an empty place, try else." << endl;
+		CurrentNode = CurrentNode->NextAddressArray[position];
 	}
 };
 
@@ -427,19 +441,21 @@ void Tree<SomeType>::go_next(int position)
 template<typename SomeType>
 void Tree<SomeType>::go_back()
 {
-	if (this->CurrentNode != nullptr)
+	if (this->CurrentNode->PreviousAddress == nullptr) 
+	{
+		cout << "This is a tree root, try else." << endl;
+		return;
+	}
+	else
 	{
 		this->CurrentNode = CurrentNode->PreviousAddress;
 	}
-	else 
-	{
-		cout << "This is a tree root, try else." << endl;
-	}
+	
 };
 
 
 double Max_Desicion = 0;
-double Min_Desicion = 10000;
+double Min_Desicion = 10000; // Two global variables for final purpose
 
 
 
@@ -526,25 +542,121 @@ void Tree<SomeType>::Special_Algorythm(Node<SomeType>* PresTreeRoot)
 	
 };
 
+template<typename SomeType>
+void Tree<SomeType>::help()
+{
+	cout << "----------------------------------------------------" << endl;
+	cout << "This is a Tree, Current_Node statement is:" << endl;
+	cout << "Data: " << this->CurrentNode->Data << "; Level: " << this->CurrentNode->Level << "; Vertexes: " << this->Vertexes << ";" << endl;
+	cout << "----------------------------------------------------" << endl;
+	cout << "Choose what you want:" << endl;
+	cout << "If you want to go next leaf: type N" << endl;
+	cout << "If you want to go previous leaf: type P" << endl;
+	cout << "if you want to add a new leaf to current one: type A" << endl;
+	cout << "if you want to execute a special algorythm: type F" << endl;
+	cout << "If you want to exit a program, type E" << endl;
+	cout << "----------------------------------------------------" << endl;
+}
+
 int main()
 {
-	Tree<int> NewTree{ 2, 3 };
-	NewTree.add_leaf(0, 4);
-	NewTree.go_next(0);
-	NewTree.add_leaf(1, 7);
-	NewTree.add_leaf(0, 8);
-	NewTree.go_next(0);
-	NewTree.add_leaf(1, 6);
-	NewTree.go_back();
-	NewTree.go_back();
-	NewTree.add_leaf(1, 5);
-	NewTree.go_next(1);
-	NewTree.add_leaf(1, 1);
-	NewTree.go_next(1);
-	NewTree.add_leaf(0, 8);
-
-	NewTree.Special_Algorythm(NewTree.TreeRoot);
-
-	cout << Max_Desicion << endl;
-	cout << Min_Desicion << endl;
+	int data = 0;
+	int Vertexes = 0;
+	
+	cout << "-----------------------------------------------------------------------" << endl;
+	cout << "This is a program for editing a binar tree, do you want to start? (y/n)" << endl;
+	cout << "-----------------------------------------------------------------------" << endl;
+	char command = ' ';
+	int pos = 0;
+	cin >> command;
+	if (command == 'y')
+	{
+		
+		cout << "Enter a Tree root data: ";
+		cin >> data;
+		cout << endl;
+		cout << "Enter a number of vertex maximum: ";
+		cin >> Vertexes;
+		cout << endl;
+		system("cls");
+		
+		Tree<int> NewTree{ Vertexes , data };
+		NewTree.help();
+		while (true)
+		{	
+			cout << "Choose wisely: ";	
+			cin >> command;
+		
+			system("cls");
+			NewTree.help();
+			cout << endl;
+			if ((command != 'N') && (command != 'P') && (command != 'A') && (command != 'E') && (command != 'F'))
+			{
+				cout << "Invalid command, try else." << endl;
+				continue;
+			}
+			if (command == 'N') 
+			{
+				cout << "Choose a position where we go: (1->n) ";
+				cin >> pos;
+				NewTree.go_next(pos);
+				system("cls");	// Из-за этого ошибок нет.
+				NewTree.help();
+			}
+			if (command == 'P') 
+			{
+				NewTree.go_back();
+				system("cls");
+				NewTree.help();
+				
+			}
+			if (command == 'A') 
+			{
+				cout << "Choose a position for adding: (1->n) " << endl;
+				cin >> pos;
+				int data;
+				cout << "Enter data: " << endl;			
+				cin >> data;
+				if (!cin) 
+				{
+					cin.clear(); 
+					cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+					cout << "Wrong data, try else." << endl;
+					continue;
+				}
+				NewTree.add_leaf(pos, data);
+				system("cls");
+				NewTree.help();
+			}
+			if (command == 'F') 
+			{
+					if (NewTree.Vertexes != 2) 
+					{
+						cout << "This is non-binar tree, try else." << endl;
+						system("cls");
+						NewTree.help();
+						continue;
+					}
+					else 
+					{
+						NewTree.Special_Algorythm(NewTree.TreeRoot);
+						cout << "Max: " << Max_Desicion << " Min: " << Min_Desicion << endl;
+					}
+			}
+			if (command == 'E') 
+			{
+				system("cls");
+				cout << "See you later!" << endl;
+				cout << endl;
+				break;
+			}
+		}
+	
+	}
+	else 
+	{
+		system("cls");
+		cout << "See you later!" << endl;
+	}
+	
 };
