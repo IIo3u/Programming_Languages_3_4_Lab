@@ -386,7 +386,8 @@ public:
 	void add_leaf(int position, SomeType Data);
 	void go_next(int position);
 	void go_back();
-	void Special_Algorythm(Node<SomeType>* RootNode);
+	void Special_Algorythm_1(Node<SomeType>* RootNode);
+	void Special_Algorythm_2(Node<SomeType>* RootNode, int pres_way_length = 0);
 	void help();
 };
 
@@ -400,7 +401,7 @@ void Tree<SomeType>::add_leaf(int position, SomeType Data)
 	}
 	if (this->CurrentNode->NextAddressArray[position] == nullptr)
 	{
-		Node<SomeType>* NewNode = new Node<SomeType>{ Data };
+		Node<SomeType>* NewNode = new Node<SomeType>{ Data , this->Vertexes};
 		NewNode->Level = this->CurrentNode->Level + 1;
 		NewNode->PreviousAddress = CurrentNode;
 		if (Hight - 1 < NewNode->Level) 
@@ -453,14 +454,13 @@ void Tree<SomeType>::go_back()
 	
 };
 
-
-double Max_Desicion = 0;
-double Min_Desicion = 10000; // Two global variables for final purpose
-
+int Min_Desicion = 10000; //two global variables for first algorythm
+int Max_Desicion = -100;
+int Max_Odd_Way_Length = 0; //global variable for second algorythm
 
 
 template<typename SomeType>
-void Tree<SomeType>::Special_Algorythm(Node<SomeType>* PresTreeRoot)
+void Tree<SomeType>::Special_Algorythm_1(Node<SomeType>* PresTreeRoot)
 {
 	Node<SomeType>* CurRootNode = PresTreeRoot;
 	if (CurRootNode->NextAddressArray[0] == nullptr && CurRootNode->NextAddressArray[1] == nullptr)
@@ -483,7 +483,7 @@ void Tree<SomeType>::Special_Algorythm(Node<SomeType>* PresTreeRoot)
 	{
 		if (CurRootNode->NextAddressArray[0] == nullptr) 
 		{
-			Special_Algorythm(CurRootNode->NextAddressArray[1]);
+			Special_Algorythm_1(CurRootNode->NextAddressArray[1]);
 			Node<SomeType>* RightNode = CurRootNode->NextAddressArray[1];
 			CurRootNode->RootSum = RightNode->RootSum + CurRootNode->Data;
 			CurRootNode->Descendant_Count = RightNode->Descendant_Count + 1;
@@ -502,7 +502,7 @@ void Tree<SomeType>::Special_Algorythm(Node<SomeType>* PresTreeRoot)
 		{
 			if (CurRootNode->NextAddressArray[1] == nullptr)
 			{
-				Special_Algorythm(CurRootNode->NextAddressArray[0]);
+				Special_Algorythm_1(CurRootNode->NextAddressArray[0]);
 				Node<SomeType>* LeftNode = CurRootNode->NextAddressArray[0];
 				CurRootNode->RootSum = LeftNode->RootSum + CurRootNode->Data;
 				CurRootNode->Descendant_Count = LeftNode->Descendant_Count + 1;
@@ -519,8 +519,8 @@ void Tree<SomeType>::Special_Algorythm(Node<SomeType>* PresTreeRoot)
 			}
 			else 
 			{
-				Special_Algorythm(CurRootNode->NextAddressArray[0]);
-				Special_Algorythm(CurRootNode->NextAddressArray[1]);
+				Special_Algorythm_1(CurRootNode->NextAddressArray[0]);
+				Special_Algorythm_1(CurRootNode->NextAddressArray[1]);
 				Node<SomeType>* LeftNode = CurRootNode->NextAddressArray[0];
 				Node<SomeType>* RightNode = CurRootNode->NextAddressArray[1];
 				CurRootNode->RootSum = LeftNode->RootSum + RightNode->RootSum + CurRootNode->Data;
@@ -543,23 +543,51 @@ void Tree<SomeType>::Special_Algorythm(Node<SomeType>* PresTreeRoot)
 };
 
 template<typename SomeType>
+void Tree<SomeType>::Special_Algorythm_2(Node<SomeType>* PresTreeRoot, int pres_way_length)
+{
+	int This_Way_Length = pres_way_length;
+	Node<SomeType>* CurrentRoot = PresTreeRoot;
+	for (int i = 0; i < CurrentRoot->NextAddressArray.get_size(); i = i + 2) 
+	{
+		if (CurrentRoot->NextAddressArray[i] != nullptr) 
+		{
+			This_Way_Length += 1;
+			CurrentRoot = CurrentRoot->NextAddressArray[i];
+			Special_Algorythm_2(CurrentRoot, This_Way_Length);
+		}
+		else 
+		{
+			
+			if (Max_Odd_Way_Length < This_Way_Length) 
+			{
+				Max_Odd_Way_Length = This_Way_Length;
+			}
+			
+		}
+	}
+};
+
+template<typename SomeType>
 void Tree<SomeType>::help()
 {
-	cout << "----------------------------------------------------" << endl;
+	cout << "---------------------------------------------------------" << endl;
 	cout << "This is a Tree, Current_Node statement is:" << endl;
 	cout << "Data: " << this->CurrentNode->Data << "; Level: " << this->CurrentNode->Level << "; Vertexes: " << this->Vertexes << ";" << endl;
-	cout << "----------------------------------------------------" << endl;
+	cout << "---------------------------------------------------------" << endl;
 	cout << "Choose what you want:" << endl;
 	cout << "If you want to go next leaf: type N" << endl;
 	cout << "If you want to go previous leaf: type P" << endl;
 	cout << "if you want to add a new leaf to current one: type A" << endl;
-	cout << "if you want to execute a special algorythm: type F" << endl;
+	cout << "if you want to execute a first special algorythm: type F" << endl;
+	cout << "if you want to execute a second special algorythm: type J" << endl;
 	cout << "If you want to exit a program, type E" << endl;
-	cout << "----------------------------------------------------" << endl;
+	cout << "---------------------------------------------------------" << endl;
 }
 
 int main()
 {
+
+
 	int data = 0;
 	int Vertexes = 0;
 	
@@ -568,6 +596,7 @@ int main()
 	cout << "-----------------------------------------------------------------------" << endl;
 	char command = ' ';
 	int pos = 0;
+WRONGINPUT:
 	cin >> command;
 	if (command == 'y')
 	{
@@ -590,7 +619,7 @@ int main()
 			system("cls");
 			NewTree.help();
 			cout << endl;
-			if ((command != 'N') && (command != 'P') && (command != 'A') && (command != 'E') && (command != 'F'))
+			if ((command != 'N') && (command != 'P') && (command != 'A') && (command != 'E') && (command != 'F') && (command != 'J'))
 			{
 				cout << "Invalid command, try else." << endl;
 				continue;
@@ -599,15 +628,13 @@ int main()
 			{
 				cout << "Choose a position where we go: (1->n) ";
 				cin >> pos;
-				NewTree.go_next(pos);
-				system("cls");	// Из-за этого ошибок нет.
-				NewTree.help();
+				NewTree.go_next(pos-1);
+				
 			}
 			if (command == 'P') 
 			{
 				NewTree.go_back();
-				system("cls");
-				NewTree.help();
+				
 				
 			}
 			if (command == 'A') 
@@ -624,24 +651,51 @@ int main()
 					cout << "Wrong data, try else." << endl;
 					continue;
 				}
-				NewTree.add_leaf(pos, data);
-				system("cls");
-				NewTree.help();
+				NewTree.add_leaf(pos-1, data);
+				
 			}
 			if (command == 'F') 
 			{
 					if (NewTree.Vertexes != 2) 
 					{
-						cout << "This is non-binar tree, try else." << endl;
-						system("cls");
-						NewTree.help();
+						cout << "This is non-binary tree, try else." << endl;
+						
 						continue;
 					}
 					else 
 					{
-						NewTree.Special_Algorythm(NewTree.TreeRoot);
+						NewTree.Special_Algorythm_1(NewTree.TreeRoot);
 						cout << "Max: " << Max_Desicion << " Min: " << Min_Desicion << endl;
 					}
+			}
+			if (command == 'J')
+			{
+				NewTree.Special_Algorythm_2(NewTree.TreeRoot);
+				cout << "Max Odd Way length:" << Max_Odd_Way_Length << endl;
+				cout << "Would you like to continue? (y/n)" << endl;
+				char decision;
+				cin >> decision;
+				while (true) 
+				{
+					if (decision == 'y') 
+					{
+						break;
+					}
+					else 
+					{
+						if (decision == 'n') 
+						{
+							system("cls");
+							cout << "See you later!" << endl;
+							return 0;
+						}
+						else 
+						{
+							cout << "Wrong input, try else." << endl;
+						}
+					}
+				}
+				
 			}
 			if (command == 'E') 
 			{
@@ -653,10 +707,18 @@ int main()
 		}
 	
 	}
-	else 
+	if (command == 'n') 
 	{
 		system("cls");
 		cout << "See you later!" << endl;
 	}
+	else 
+	{
+		
+		cout << "Wrong input, try else:" << endl;
+		goto WRONGINPUT;
+	}
 	
+
+
 };
